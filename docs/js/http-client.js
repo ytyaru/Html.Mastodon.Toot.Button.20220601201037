@@ -1,13 +1,8 @@
 class HttpClient {
     constructor(domain='mstdn.jp') {
-        const url = new URL(location.href)
-        url.searchParams.delete('code');
-        this.redirect_uri = url.href
-        this.domain = domain
-        this.scope = 'read write follow push'
     }
-    async get(url, headers) { return await fetch(url) }
-    async post(endpoint, headers, params) {
+    async get(url, headers) {}
+    async post(url, headers, params) {
         const method = "POST";
         const body = JSON.stringify(params);
         const defaultHeaders = {
