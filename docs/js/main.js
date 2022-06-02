@@ -3,14 +3,20 @@ window.addEventListener('DOMContentLoaded', async (event) => {
     const tooter = new Tooter('pawoo.net')
     const url = new URL(location.href)
     if (url.searchParams.has('code')) { // マストドンAPI oauth/authorize でリダイレクトされた場合
+        const code = url.searchParams.get('code')
+        // 認証コード(code)をURLパラメータから削除する
+        const params = url.searchParams;
+        params.delete('code');
+        history.replaceState('', '', url.pathname);
+        // トークンを取得して有効であることを確認しトゥートする
         const status = localStorage.getItem('status')
         if (status) { document.getElementById('status').value = status; }
         console.log('----- authorized -----')
         console.log('client_id:', localStorage.getItem('client_id'))
         console.log('client_secret:', localStorage.getItem('client_secret'))
-        console.log('認証コード', url.searchParams.get('code'))
+        console.log('認証コード', code)
         // client_id, client_secretはLocalStorageに保存しておく必要がある
-        const json = await tooter.getToken(localStorage.getItem('client_id'), localStorage.getItem('client_secret'), url.searchParams.get('code'))
+        const json = await tooter.getToken(localStorage.getItem('client_id'), localStorage.getItem('client_secret'), code)
         console.log(json)
         console.log('access_token:', json.access_token)
         localStorage.setItem('access_token', json.access_token);
@@ -21,10 +27,6 @@ window.addEventListener('DOMContentLoaded', async (event) => {
         console.log(res)
         document.getElementById('res').value = JSON.stringify(res)
         localStorage.removeItem('status')
-        // 認証コード(code)をURLパラメータから削除する
-        const params = url.searchParams;
-        params.delete('code');
-        history.replaceState('', '', url.pathname);
         console.log('----- 以上 -----')
     }
     document.getElementById('toot').addEventListener('click', async(event) => {
