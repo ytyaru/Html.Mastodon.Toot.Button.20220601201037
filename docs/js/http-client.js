@@ -1,4 +1,4 @@
-class Tooter {
+class HttpClient {
     constructor(domain='mstdn.jp') {
         const url = new URL(location.href)
         url.searchParams.delete('code');
@@ -6,38 +6,25 @@ class Tooter {
         this.domain = domain
         this.scope = 'read write follow push'
     }
-    getDefaultJsonHeaders() { return {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-    }}
-    getJsonHeaders(headers=null) { return (headers) ? {...this.getDefaultJsonHeaders(), ...headers} : this.getDefaultJsonHeaders() }
-    async get(endpoint, headers) {
-        const url = `https://${this.domain}/${endpoint}`
-        const data = {
-            method: 'GET',
-//            headers: (headers) ? {...this.getJsonHeaders(), ...headers} : this.getJsonHeaders()
-            headers: this.getJsonHeaders(headers)
-        }
-        console.debug(url)
-        console.debug(data)
-        const res = await fetch(url, data)
-        console.debug(res)
-        const json = await res.json()
-        console.debug(json)
-        console.debug(JSON.stringify(json))
-        return json
-    }
+    async get(url, headers) { return await fetch(url) }
     async post(endpoint, headers, params) {
         const method = "POST";
         const body = JSON.stringify(params);
+        const defaultHeaders = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        };
+        const fullHeaders = (headers) ? {...defaultHeaders , headers} : defaultHeaders
         const url = `https://${this.domain}/${endpoint}`
         console.debug(url)
+        console.debug(fullHeaders)
+        console.debug(params)
+        console.debug(body)
         const data = {}
         data.method = method
-        data.headers = this.getJsonHeaders(headers)
+        data.headers = fullHeaders
         if (params) { data.body = body }
-        console.debug(params)
-        console.debug(data)
+        //const res = await fetch(url, {method:method, headers:fullHeaders, body:body}).catch((e)=>throw e);
         //const res = await fetch(url, data).catch((e)=>throw e);
         const res = await fetch(url, data)
         console.debug(res)
@@ -129,7 +116,7 @@ class Tooter {
         const headers = {
           'Authorization': `Bearer ${accessToken}`,
         };
-        const res = await this.get('api/v1/apps/verify_credentials', headers, null)
+        const res = await this.post('api/v1/apps/verify_credentials', headers, null)
         if (res.hasOwnProperty('error')) { return false }
         return true
         /*

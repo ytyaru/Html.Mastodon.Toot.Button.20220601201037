@@ -2,30 +2,7 @@ window.addEventListener('DOMContentLoaded', async (event) => {
     console.log('DOMContentLoaded!!');
     const tooter = new Tooter('pawoo.net')
     const url = new URL(location.href)
-    if (!url.searchParams.has('code')) { // マストドンAPI oauth/authorize でリダイレクトされた場合
-        document.getElementById('toot').addEventListener('click', async(event) => {
-            const access_token = localStorage.getItem('access_token')
-            if (access_token && tooter.verify(access_token)) {
-                console.log('既存のトークンが有効なため即座にトゥートします。');
-                const res = await tooter.toot(access_token)
-                console.log(res)
-                document.getElementById('res').value = JSON.stringify(res)
-            } else {
-                console.log('既存のトークンがないか無効のため、新しいアクセストークンを発行します。');
-                const app = await tooter.createApp()
-                localStorage.setItem('client_id', app.client_id);
-                localStorage.setItem('client_secret', app.client_secret);
-                localStorage.setItem('status', document.getElementById('status').value);
-                console.log(app)
-                console.log(app.client_id)
-                console.log(app.client_secret)
-                console.log(localStorage.getItem('client_id'))
-                console.log(localStorage.getItem('client_secret'))
-                tooter.authorize(app.client_id)
-            }
-        });
-    }
-    else {
+    if (url.searchParams.has('code')) { // マストドンAPI oauth/authorize でリダイレクトされた場合
         const status = localStorage.getItem('status')
         if (status) { document.getElementById('status').value = status; }
         console.log('----- authorized -----')
@@ -44,13 +21,33 @@ window.addEventListener('DOMContentLoaded', async (event) => {
         console.log(res)
         document.getElementById('res').value = JSON.stringify(res)
         localStorage.removeItem('status')
-
         // 認証コード(code)をURLパラメータから削除する
         const params = url.searchParams;
         params.delete('code');
         history.replaceState('', '', url.pathname);
         console.log('----- 以上 -----')
     }
+    document.getElementById('toot').addEventListener('click', async(event) => {
+        const access_token = localStorage.getItem('access_token')
+        if (access_token && tooter.verify(access_token)) {
+            console.log('既存のトークンが有効なため即座にトゥートします。');
+            const res = await tooter.toot(access_token)
+            console.log(res)
+            document.getElementById('res').value = JSON.stringify(res)
+        } else {
+            console.log('既存のトークンがないか無効のため、新しいアクセストークンを発行します。');
+            const app = await tooter.createApp()
+            localStorage.setItem('client_id', app.client_id);
+            localStorage.setItem('client_secret', app.client_secret);
+            localStorage.setItem('status', document.getElementById('status').value);
+            console.log(app)
+            console.log(app.client_id)
+            console.log(app.client_secret)
+            console.log(localStorage.getItem('client_id'))
+            console.log(localStorage.getItem('client_secret'))
+            tooter.authorize(app.client_id)
+        }
+    });
 });
 window.addEventListener('beforeunload', (event) => {
     console.log('beforeunload!!');
