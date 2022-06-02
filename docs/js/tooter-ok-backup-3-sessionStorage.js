@@ -15,6 +15,7 @@ class Tooter {
         const url = `https://${this.domain}/${endpoint}`
         const data = {
             method: 'GET',
+//            headers: (headers) ? {...this.getJsonHeaders(), ...headers} : this.getJsonHeaders()
             headers: this.getJsonHeaders(headers)
         }
         console.debug(url)
